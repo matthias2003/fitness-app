@@ -56,3 +56,8 @@ export async function api<T>(path: string, options: RequestOptions = {}): Promis
 
   return response.json() as Promise<T>
 }
+
+export function errorMessage(reason: unknown): string {
+  if (reason instanceof Error) return reason.message
+  return String(reason)
+}

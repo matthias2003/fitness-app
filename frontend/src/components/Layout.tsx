@@ -2,10 +2,24 @@ import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useAuth, type Role } from '../auth/useAuth'
 import { secondaryButton } from './styles'
 
-const roleLinks: Record<Role, string[]> = {
-  MEMBER: ['My membership', 'Class schedule'],
-  TRAINER: ['My classes', 'Clients'],
-  ADMIN: ['Admin panel', 'Users'],
+type NavItem = {
+  label: string
+  to?: string
+}
+
+const roleLinks: Record<Role, NavItem[]> = {
+  MEMBER: [
+    { label: 'My membership', to: '/membership' },
+    { label: 'My QR', to: '/qr' },
+    { label: 'Check-ins', to: '/check-ins' },
+    { label: 'Class schedule' },
+  ],
+  TRAINER: [{ label: 'Scanner', to: '/scanner' }, { label: 'My classes' }, { label: 'Clients' }],
+  ADMIN: [
+    { label: 'Members', to: '/admin/members' },
+    { label: 'Scanner', to: '/scanner' },
+    { label: 'Status', to: '/status' },
+  ],
 }
 
 function navTabClass({ isActive }: { isActive: boolean }) {
@@ -16,6 +30,25 @@ function navTabClass({ isActive }: { isActive: boolean }) {
 
 function authLinkClass({ isActive }: { isActive: boolean }) {
   return `text-sm font-medium ${isActive ? 'text-accent' : 'text-ink'}`
+}
+
+function NavItemLink({ item }: { item: NavItem }) {
+  if (!item.to) {
+    return (
+      <span
+        title="Coming soon"
+        className="cursor-default rounded-full px-4 py-2 text-sm font-medium text-muted opacity-60"
+      >
+        {item.label}
+      </span>
+    )
+  }
+
+  return (
+    <NavLink to={item.to} className={navTabClass}>
+      {item.label}
+    </NavLink>
+  )
 }
 
 export function Layout() {
@@ -42,20 +75,9 @@ export function Layout() {
             <NavLink to="/" end className={navTabClass}>
               Home
             </NavLink>
-            {roleLinks[user.role].map((label) => (
-              <span
-                key={label}
-                title="Coming soon"
-                className="cursor-default rounded-full px-4 py-2 text-sm font-medium text-muted opacity-60"
-              >
-                {label}
-              </span>
+            {roleLinks[user.role].map((item) => (
+              <NavItemLink key={item.label} item={item} />
             ))}
-            {user.role === 'ADMIN' && (
-              <NavLink to="/status" className={navTabClass}>
-                Status
-              </NavLink>
-            )}
           </nav>
         )}
 

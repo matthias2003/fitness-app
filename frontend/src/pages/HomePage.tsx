@@ -1,21 +1,31 @@
+import { Link } from 'react-router-dom'
 import { roleLabels } from '../auth/roles'
 import { useAuth, type Role } from '../auth/useAuth'
 import { pageTitle, tag } from '../components/styles'
 
-const roleTiles: Record<Role, { title: string; description: string }[]> = {
+type Tile = {
+  title: string
+  description: string
+  to?: string
+}
+
+const roleTiles: Record<Role, Tile[]> = {
   MEMBER: [
-    { title: 'My membership', description: 'Buy and track your pass' },
+    { title: 'My membership', description: 'Buy and track your pass', to: '/membership' },
+    { title: 'My QR code', description: 'Show it at the front desk', to: '/qr' },
+    { title: 'Check-in history', description: 'Your gym visits', to: '/check-ins' },
     { title: 'Class schedule', description: 'Book group classes' },
     { title: 'Workout log', description: 'Log sets and see progress' },
   ],
   TRAINER: [
+    { title: 'Check-in scanner', description: 'Scan member QR codes', to: '/scanner' },
     { title: 'My classes', description: 'Your upcoming sessions' },
     { title: 'Clients', description: 'People you train' },
     { title: 'Training plans', description: 'Build plans for clients' },
   ],
   ADMIN: [
-    { title: 'Members', description: 'Members and their passes' },
-    { title: 'Check-in scanner', description: 'Scan member QR codes' },
+    { title: 'Members', description: 'Members and their passes', to: '/admin/members' },
+    { title: 'Check-in scanner', description: 'Scan member QR codes', to: '/scanner' },
     { title: 'Class schedule', description: 'Plan group classes' },
   ],
 }
@@ -46,13 +56,29 @@ export function HomePage() {
           <p className="text-sm text-on-accent">{user.email}</p>
         </article>
         {roleTiles[user.role].map((tile) => (
-          <article key={tile.title} className={`${tileClass} bg-surface`}>
-            <span className={`${tag} mb-auto bg-surface-2 text-muted`}>Coming soon</span>
-            <h3 className="text-lg font-semibold tracking-tight text-ink">{tile.title}</h3>
-            <p className="text-sm">{tile.description}</p>
-          </article>
+          <HomeTile key={tile.title} tile={tile} />
         ))}
       </div>
     </section>
+  )
+}
+
+function HomeTile({ tile }: { tile: Tile }) {
+  if (!tile.to) {
+    return (
+      <article className={`${tileClass} bg-surface`}>
+        <span className={`${tag} mb-auto bg-surface-2 text-muted`}>Coming soon</span>
+        <h3 className="text-lg font-semibold tracking-tight text-ink">{tile.title}</h3>
+        <p className="text-sm">{tile.description}</p>
+      </article>
+    )
+  }
+
+  return (
+    <Link to={tile.to} className={`${tileClass} bg-surface transition hover:bg-surface-2`}>
+      <span className={`${tag} mb-auto bg-accent text-on-accent`}>Open →</span>
+      <h3 className="text-lg font-semibold tracking-tight text-ink">{tile.title}</h3>
+      <p className="text-sm">{tile.description}</p>
+    </Link>
   )
 }

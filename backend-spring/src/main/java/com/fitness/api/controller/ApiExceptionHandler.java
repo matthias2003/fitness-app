@@ -11,6 +11,8 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestControllerAdvice
@@ -28,6 +30,11 @@ public class ApiExceptionHandler {
 	@ExceptionHandler(HttpMessageNotReadableException.class)
 	public ResponseEntity<Map<String, Object>> handleUnreadable(HttpMessageNotReadableException ex) {
 		return ResponseEntity.badRequest().body(Map.of("message", "Malformed request"));
+	}
+
+	@ExceptionHandler({ HandlerMethodValidationException.class, MethodArgumentTypeMismatchException.class })
+	public ResponseEntity<Map<String, Object>> handleInvalidParameter(Exception ex) {
+		return ResponseEntity.badRequest().body(Map.of("message", "Invalid request parameters"));
 	}
 
 	@ExceptionHandler(AuthenticationException.class)

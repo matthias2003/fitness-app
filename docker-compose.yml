@@ -45,6 +45,7 @@ services:
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
       TRAINING_API_URL: http://training-api:5046
+      TZ: Europe/Warsaw
       JWT_SECRET: ${JWT_SECRET}
       SEED_PASSWORD: ${SEED_PASSWORD}
     ports:

@@ -1,9 +1,11 @@
+name: fitness-app
+
 services:
   postgres:
     image: postgres:17
     environment:
-      POSTGRES_USER: fitness
-      POSTGRES_PASSWORD: fitness
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: fitness_core
     ports:
       - "5432:5432"

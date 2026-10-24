@@ -12,6 +12,65 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME}"]
+      interval: 2s
+      retries: 20
+
+  training-api:
+    image: mcr.microsoft.com/dotnet/sdk:10.0
+    working_dir: /app
+    command: dotnet watch run --no-launch-profile --non-interactive
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://0.0.0.0:5046
+      ConnectionStrings__Training: Host=postgres;Port=5432;Database=fitness_training;Username=${DB_USERNAME};Password=${DB_PASSWORD}
+    ports:
+      - "5046:5046"
+    volumes:
+      - ./backend-dotnet:/app
+      - /app/bin
+      - /app/obj
+      - nuget-cache:/root/.nuget/packages
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  core-api:
+    image: eclipse-temurin:21-jdk
+    working_dir: /app
+    command: ./mvnw spring-boot:run
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/fitness_core
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      TRAINING_API_URL: http://training-api:5046
+      JWT_SECRET: ${JWT_SECRET}
+      SEED_PASSWORD: ${SEED_PASSWORD}
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./backend-spring:/app
+      - maven-cache:/root/.m2
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    image: node:24
+    working_dir: /app
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    environment:
+      API_URL: http://core-api:8080
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - core-api
 
 volumes:
   postgres-data:
+  maven-cache:
+  nuget-cache:

@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fitness.api.dto.BuyMembershipRequest;
 import com.fitness.api.dto.CheckInResponse;
+import com.fitness.api.dto.MemberResponse;
 import com.fitness.api.dto.MembershipResponse;
 import com.fitness.api.dto.PageResponse;
 import com.fitness.api.dto.QrTokenResponse;
@@ -27,7 +28,7 @@ import com.fitness.api.service.MemberService;
 import com.fitness.api.service.MembershipService;
 
 @RestController
-@RequestMapping("/api/members/me")
+@RequestMapping("/api/members")
 public class MemberController {
 
 	private final MembershipService membershipService;
@@ -43,14 +44,21 @@ public class MemberController {
 		this.checkInService = checkInService;
 	}
 
-	@GetMapping("/membership")
+	@GetMapping
+	public PageResponse<MemberResponse> getMembers(
+			@RequestParam(defaultValue = "0") @Min(0) @Max(100000) int page,
+			@RequestParam(defaultValue = "10") @Min(1) @Max(100) int size) {
+		return memberService.getMembers(page, size);
+	}
+
+	@GetMapping("/me/membership")
 	public MembershipResponse getMembership(@AuthenticationPrincipal Jwt jwt) {
 		UUID memberId = UUID.fromString(jwt.getSubject());
 
 		return membershipService.getCurrentMembership(memberId);
 	}
 
-	@PostMapping("/memberships")
+	@PostMapping("/me/memberships")
 	@ResponseStatus(HttpStatus.CREATED)
 	public MembershipResponse buyMembership(@AuthenticationPrincipal Jwt jwt,
 			@Valid @RequestBody BuyMembershipRequest request) {
@@ -59,14 +67,14 @@ public class MemberController {
 		return membershipService.buy(memberId, request);
 	}
 
-	@GetMapping("/qr")
+	@GetMapping("/me/qr")
 	public QrTokenResponse getQrToken(@AuthenticationPrincipal Jwt jwt) {
 		UUID memberId = UUID.fromString(jwt.getSubject());
 
 		return memberService.getQrToken(memberId);
 	}
 
-	@GetMapping("/check-ins")
+	@GetMapping("/me/check-ins")
 	public PageResponse<CheckInResponse> getCheckIns(@AuthenticationPrincipal Jwt jwt,
 			@RequestParam(defaultValue = "0") @Min(0) @Max(100000) int page,
 			@RequestParam(defaultValue = "10") @Min(1) @Max(100) int size) {

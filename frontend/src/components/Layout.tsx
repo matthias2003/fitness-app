@@ -12,12 +12,21 @@ const roleLinks: Record<Role, NavItem[]> = {
     { label: 'My membership', to: '/membership' },
     { label: 'My QR', to: '/qr' },
     { label: 'Check-ins', to: '/check-ins' },
+    { label: 'My plan', to: '/plan' },
+    { label: 'Exercises', to: '/exercises' },
     { label: 'Class schedule' },
   ],
-  TRAINER: [{ label: 'Scanner', to: '/scanner' }, { label: 'My classes' }, { label: 'Clients' }],
-  ADMIN: [
-    { label: 'Members', to: '/admin/members' },
+  TRAINER: [
     { label: 'Scanner', to: '/scanner' },
+    { label: 'Members', to: '/members' },
+    { label: 'Clients', to: '/trainer/clients' },
+    { label: 'Exercises', to: '/exercises' },
+    { label: 'My classes' },
+  ],
+  ADMIN: [
+    { label: 'Members', to: '/members' },
+    { label: 'Scanner', to: '/scanner' },
+    { label: 'Exercises', to: '/exercises' },
     { label: 'Status', to: '/status' },
   ],
 }
@@ -63,12 +72,14 @@ export function Layout() {
   return (
     <>
       <header className="flex flex-wrap items-center gap-x-6 gap-y-3 px-4 py-3.5 md:px-8 md:py-4">
-        <Link to="/" className="flex items-center gap-2.5 text-lg font-bold text-ink">
-          <span className="grid size-8 place-items-center rounded-full bg-accent text-[15px] text-on-accent">
-            F
-          </span>
-          Fitness App
-        </Link>
+        <div className="md:flex-1">
+          <Link to="/" className="flex w-fit items-center gap-2.5 text-lg font-bold text-ink">
+            <span className="grid size-8 place-items-center rounded-full bg-accent text-[15px] text-on-accent">
+              F
+            </span>
+            Fitness App
+          </Link>
+        </div>
 
         {user && (
           <nav className="order-3 flex w-full flex-wrap justify-center gap-1 rounded-card bg-surface p-1.5 md:order-none md:mx-auto md:w-auto md:rounded-full">
@@ -81,7 +92,7 @@ export function Layout() {
           </nav>
         )}
 
-        <div className="ml-auto flex items-center gap-3 text-sm text-ink">
+        <div className="ml-auto flex items-center justify-end gap-3 text-sm text-ink md:flex-1">
           {user ? (
             <>
               <span className="hidden md:inline">

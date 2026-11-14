@@ -9,8 +9,8 @@ namespace Fitness.Training.Api.Controllers;
 public class StatusController(StatusService statusService) : ControllerBase
 {
     [HttpGet]
-    public Task<StatusResponse> Get(CancellationToken cancellationToken)
+    public Task<StatusResponse> Get()
     {
-        return statusService.GetStatus(cancellationToken);
+        return statusService.GetStatus();
     }
 }

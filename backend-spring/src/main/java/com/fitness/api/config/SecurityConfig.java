@@ -56,6 +56,9 @@ public class SecurityConfig {
 				.requestMatchers("/error").permitAll()
 				.requestMatchers("/api/admin/**", "/api/status").hasRole("ADMIN")
 				.requestMatchers("/api/members/me/**").hasRole("MEMBER")
+				.requestMatchers(HttpMethod.GET, "/api/members").hasAnyRole("ADMIN", "TRAINER")
+				.requestMatchers("/api/members/*/training-plan").hasRole("TRAINER")
+				.requestMatchers("/api/trainers/me/**").hasRole("TRAINER")
 				.requestMatchers("/api/check-ins").hasAnyRole("ADMIN", "TRAINER")
 				.anyRequest().authenticated())
 			.oauth2ResourceServer((oauth2) -> oauth2

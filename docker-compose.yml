@@ -25,6 +25,7 @@ services:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://0.0.0.0:5046
       ConnectionStrings__Training: Host=postgres;Port=5432;Database=fitness_training;Username=${DB_USERNAME};Password=${DB_PASSWORD}
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY}
     ports:
       - "5046:5046"
     volumes:
@@ -48,6 +49,7 @@ services:
       TZ: Europe/Warsaw
       JWT_SECRET: ${JWT_SECRET}
       SEED_PASSWORD: ${SEED_PASSWORD}
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY}
     ports:
       - "8080:8080"
     volumes:

@@ -18,3 +18,13 @@ export const formError = 'rounded-field bg-danger/10 px-4 py-3 text-sm text-dang
 export const pageTitle = 'text-3xl font-semibold tracking-tight text-ink'
 
 export const tag = 'self-start rounded-full px-2.5 py-0.5 text-xs font-medium'
+
+export function choicePill(active: boolean) {
+  const base = 'cursor-pointer rounded-full px-4 py-2 text-sm font-medium transition'
+  const state = active ? 'bg-accent text-on-accent' : 'bg-surface-2 text-ink hover:bg-neutral-700'
+
+  return `${base} ${state}`
+}
+
+export const linkPill =
+  'self-start rounded-full bg-surface-2 px-4 py-1.5 text-[13px] font-semibold text-ink transition hover:bg-neutral-700 sm:self-auto'

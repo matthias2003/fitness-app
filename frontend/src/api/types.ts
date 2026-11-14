@@ -45,3 +45,49 @@ export type Member = {
   membershipEndDate: string | null
   membershipActive: boolean
 }
+
+export type Goal = 'STRENGTH' | 'MUSCLE' | 'ENDURANCE'
+
+export type Level = 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED'
+
+export type Exercise = {
+  id: number
+  name: string
+  muscleGroup: string
+  equipment: string
+}
+
+export type PlanExercise = {
+  exerciseId: number
+  name: string
+  muscleGroup: string
+  sets: number
+  reps: number
+}
+
+export type PlanDay = {
+  dayNo: number
+  name: string
+  exercises: PlanExercise[]
+}
+
+export type TrainingPlan = {
+  id: string
+  memberId: string
+  authorId: string
+  goal: Goal
+  level: Level
+  template: string
+  createdAt: string
+  days: PlanDay[]
+  memberName: string
+  authorName: string
+  assignedAt: string
+}
+
+export type Client = {
+  id: string
+  email: string
+  firstName: string
+  lastName: string
+}

@@ -1,3 +1,5 @@
+import type { Goal, Level } from '../api/types'
+
 const dateFormat: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short', year: 'numeric' }
 
 export function formatDate(isoDate: string): string {
@@ -17,4 +19,16 @@ export function formatDateTime(isoInstant: string): string {
 
 export function formatPrice(price: number): string {
   return `${price.toFixed(2)} PLN`
+}
+
+export const goalLabels: Record<Goal, string> = {
+  STRENGTH: 'Strength',
+  MUSCLE: 'Muscle',
+  ENDURANCE: 'Endurance',
+}
+
+export const levelLabels: Record<Level, string> = {
+  BEGINNER: 'Beginner',
+  INTERMEDIATE: 'Intermediate',
+  ADVANCED: 'Advanced',
 }

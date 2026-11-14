@@ -124,7 +124,7 @@ class CheckInControllerTests {
 		checkIn(memberToken, qrToken)
 			.andExpect(status().isForbidden());
 
-		mockMvc.perform(get("/api/admin/members").header(HttpHeaders.AUTHORIZATION, bearer(memberToken)))
+		mockMvc.perform(get("/api/members").header(HttpHeaders.AUTHORIZATION, bearer(memberToken)))
 			.andExpect(status().isForbidden());
 	}
 
@@ -149,12 +149,12 @@ class CheckInControllerTests {
 	}
 
 	@Test
-	void pagesAdminMembersList() throws Exception {
+	void pagesMembersList() throws Exception {
 		registerAndLogin("listed1@example.com");
 		registerAndLogin("listed2@example.com");
 		String adminToken = adminToken();
 
-		mockMvc.perform(get("/api/admin/members?page=0&size=1").header(HttpHeaders.AUTHORIZATION, bearer(adminToken)))
+		mockMvc.perform(get("/api/members?page=0&size=1").header(HttpHeaders.AUTHORIZATION, bearer(adminToken)))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.items.length()").value(1))
 			.andExpect(jsonPath("$.items[0].email").exists())
@@ -168,11 +168,11 @@ class CheckInControllerTests {
 	void rejectsInvalidPaging() throws Exception {
 		String adminToken = adminToken();
 
-		mockMvc.perform(get("/api/admin/members?size=0").header(HttpHeaders.AUTHORIZATION, bearer(adminToken)))
+		mockMvc.perform(get("/api/members?size=0").header(HttpHeaders.AUTHORIZATION, bearer(adminToken)))
 			.andExpect(status().isBadRequest())
 			.andExpect(jsonPath("$.message").value("Invalid request parameters"));
 
-		mockMvc.perform(get("/api/admin/members?page=2147483647&size=100")
+		mockMvc.perform(get("/api/members?page=2147483647&size=100")
 				.header(HttpHeaders.AUTHORIZATION, bearer(adminToken)))
 			.andExpect(status().isBadRequest())
 			.andExpect(jsonPath("$.message").value("Invalid request parameters"));

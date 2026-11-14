@@ -1,13 +1,18 @@
 import { useEffect, useState } from 'react'
-import { api, errorMessage } from '../../api/client'
-import type { Member, PageResponse } from '../../api/types'
-import { formatDate } from '../../components/format'
-import { Pagination } from '../../components/Pagination'
-import { card, pageTitle } from '../../components/styles'
+import { Link } from 'react-router-dom'
+import { api, errorMessage } from '../api/client'
+import type { Member, PageResponse } from '../api/types'
+import { useAuth } from '../auth/useAuth'
+import { formatDate } from '../components/format'
+import { Pagination } from '../components/Pagination'
+import { card, linkPill, pageTitle } from '../components/styles'
 
 const PAGE_SIZE = 10
 
 export function MembersPage() {
+  const { user } = useAuth()
+  const isTrainer = user?.role === 'TRAINER'
+
   const [page, setPage] = useState(0)
   const [result, setResult] = useState<PageResponse<Member> | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -19,7 +24,7 @@ export function MembersPage() {
       setError(null)
 
       try {
-        const path = `/api/admin/members?page=${page}&size=${PAGE_SIZE}`
+        const path = `/api/members?page=${page}&size=${PAGE_SIZE}`
         const members = await api<PageResponse<Member>>(path)
         if (!ignore) setResult(members)
       } catch (reason) {
@@ -52,7 +57,7 @@ export function MembersPage() {
           ) : (
             <ul className="divide-y divide-surface-2">
               {result.items.map((member) => (
-                <MemberRow key={member.id} member={member} />
+                <MemberRow key={member.id} member={member} showPlanLink={isTrainer} />
               ))}
             </ul>
           )}
@@ -64,16 +69,28 @@ export function MembersPage() {
   )
 }
 
-function MemberRow({ member }: { member: Member }) {
+type MemberRowProps = {
+  member: Member
+  showPlanLink: boolean
+}
+
+function MemberRow({ member, showPlanLink }: MemberRowProps) {
+  const memberName = `${member.firstName} ${member.lastName}`
+
   return (
     <li className="flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between">
       <div className="min-w-0">
-        <p className="font-medium text-ink">
-          {member.firstName} {member.lastName}
-        </p>
+        <p className="font-medium text-ink">{memberName}</p>
         <p className="truncate text-sm">{member.email}</p>
       </div>
-      <MembershipStatus member={member} />
+      <div className="flex flex-wrap items-center gap-2">
+        <MembershipStatus member={member} />
+        {showPlanLink && (
+          <Link to={`/members/${member.id}/plan`} state={{ memberName }} className={linkPill}>
+            Plan
+          </Link>
+        )}
+      </div>
     </li>
   )
 }

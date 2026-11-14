@@ -5,9 +5,9 @@ namespace Fitness.Training.Api.Services;
 
 public class StatusService(TrainingDbContext db)
 {
-    public async Task<StatusResponse> GetStatus(CancellationToken cancellationToken)
+    public async Task<StatusResponse> GetStatus()
     {
-        var databaseUp = await db.Database.CanConnectAsync(cancellationToken);
+        var databaseUp = await db.Database.CanConnectAsync();
         return new StatusResponse("training-api", "UP", databaseUp ? "UP" : "DOWN");
     }
 }

@@ -13,12 +13,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.fitness.api.dto.AuthSession;
 import com.fitness.api.dto.LoginRequest;
 import com.fitness.api.dto.LoginResponse;
 import com.fitness.api.dto.RegisterRequest;
 import com.fitness.api.dto.UserResponse;
+import com.fitness.api.model.RefreshToken;
 import com.fitness.api.model.Role;
 import com.fitness.api.model.User;
+import com.fitness.api.repository.RefreshTokenRepository;
 import com.fitness.api.repository.UserRepository;
 
 @Service
@@ -34,12 +37,16 @@ public class AuthService {
 
 	private final TokenService tokenService;
 
+	private final RefreshTokenRepository refreshTokenRepository;
+
 	public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder,
-			AuthenticationManager authenticationManager, TokenService tokenService) {
+			AuthenticationManager authenticationManager, TokenService tokenService,
+			RefreshTokenRepository refreshTokenRepository) {
 		this.userRepository = userRepository;
 		this.passwordEncoder = passwordEncoder;
 		this.authenticationManager = authenticationManager;
 		this.tokenService = tokenService;
+		this.refreshTokenRepository = refreshTokenRepository;
 	}
 
 	@Transactional
@@ -62,7 +69,8 @@ public class AuthService {
 		}
 	}
 
-	public LoginResponse login(LoginRequest request) {
+	@Transactional
+	public AuthSession login(LoginRequest request) {
 		requireBcryptLength(request.password());
 
 		String email = normalizeEmail(request.email());
@@ -72,9 +80,32 @@ public class AuthService {
 		authenticationManager.authenticate(credentials);
 
 		User user = userRepository.findByEmail(email).orElseThrow();
-		String token = tokenService.createToken(user);
+		String accessToken = tokenService.createToken(user);
 
-		return new LoginResponse(token, UserResponse.from(user));
+		RefreshToken refreshToken = new RefreshToken(user);
+		refreshTokenRepository.save(refreshToken);
+
+		UserResponse userResponse = UserResponse.from(user);
+
+		return new AuthSession(accessToken, refreshToken.getToken(), userResponse);
+	}
+
+	@Transactional(readOnly = true)
+	public LoginResponse refresh(String refreshTokenValue) {
+		RefreshToken refreshToken = refreshTokenRepository.findByToken(refreshTokenValue)
+			.filter((token) -> !token.isExpired())
+			.orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Session expired"));
+
+		User user = refreshToken.getUser();
+		String accessToken = tokenService.createToken(user);
+		UserResponse userResponse = UserResponse.from(user);
+
+		return new LoginResponse(accessToken, userResponse);
+	}
+
+	@Transactional
+	public void logout(String refreshTokenValue) {
+		refreshTokenRepository.deleteByToken(refreshTokenValue);
 	}
 
 	public UserResponse getCurrentUser(UUID userId) {

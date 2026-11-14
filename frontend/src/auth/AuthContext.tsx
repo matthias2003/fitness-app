@@ -1,32 +1,55 @@
-import { useState, type ReactNode } from 'react'
-import { api, setAccessToken } from '../api/client'
+import { useEffect, useState, type ReactNode } from 'react'
+import {
+  api,
+  endSession,
+  refreshSession,
+  setAccessToken,
+  setSessionExpiredHandler,
+  type Session,
+} from '../api/client'
 import { AuthContext, type RegisterData, type User } from './useAuth'
-
-type LoginResponse = {
-  token: string
-  user: User
-}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
+  const [restoring, setRestoring] = useState(true)
+
+  useEffect(() => {
+    setSessionExpiredHandler(() => setUser(null))
+
+    async function restoreSession() {
+      const session = await refreshSession().catch(() => null)
+
+      if (session) {
+        setUser(session.user)
+      }
+
+      setRestoring(false)
+    }
+
+    restoreSession()
+  }, [])
 
   async function login(email: string, password: string) {
-    const response = await api<LoginResponse>('/api/auth/login', {
+    const session = await api<Session>('/api/auth/login', {
       method: 'POST',
       body: { email, password },
     })
 
-    setAccessToken(response.token)
-    setUser(response.user)
+    setAccessToken(session.token)
+    setUser(session.user)
   }
 
   async function register(data: RegisterData) {
     await api<User>('/api/auth/register', { method: 'POST', body: data })
   }
 
-  function logout() {
-    setAccessToken(null)
+  async function logout() {
+    await endSession().catch(() => undefined)
     setUser(null)
+  }
+
+  if (restoring) {
+    return null
   }
 
   return (

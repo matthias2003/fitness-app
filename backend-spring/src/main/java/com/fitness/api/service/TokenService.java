@@ -15,7 +15,7 @@ import com.fitness.api.model.User;
 @Service
 public class TokenService {
 
-	private static final Duration TOKEN_LIFETIME = Duration.ofHours(8);
+	private static final Duration TOKEN_LIFETIME = Duration.ofMinutes(15);
 
 	private final JwtEncoder jwtEncoder;
 

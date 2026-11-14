@@ -52,7 +52,8 @@ public class SecurityConfig {
 			.formLogin((form) -> form.disable())
 			.httpBasic((basic) -> basic.disable())
 			.authorizeHttpRequests((auth) -> auth
-				.requestMatchers(HttpMethod.POST, "/api/auth/register", "/api/auth/login").permitAll()
+				.requestMatchers(HttpMethod.POST, "/api/auth/register", "/api/auth/login", "/api/auth/refresh",
+						"/api/auth/logout").permitAll()
 				.requestMatchers("/error").permitAll()
 				.requestMatchers("/api/admin/**", "/api/status").hasRole("ADMIN")
 				.requestMatchers("/api/members/me/**").hasRole("MEMBER")

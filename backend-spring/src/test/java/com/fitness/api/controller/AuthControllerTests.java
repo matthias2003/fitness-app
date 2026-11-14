@@ -2,14 +2,18 @@ package com.fitness.api.controller;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import jakarta.servlet.http.Cookie;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
@@ -89,6 +93,47 @@ class AuthControllerTests {
 	}
 
 	@Test
+	void loginSetsRefreshCookie() throws Exception {
+		register("cookie@example.com", "password123").andExpect(status().isCreated());
+
+		login("cookie@example.com", "password123")
+			.andExpect(status().isOk())
+			.andExpect(cookie().exists("refresh_token"))
+			.andExpect(cookie().httpOnly("refresh_token", true))
+			.andExpect(cookie().sameSite("refresh_token", "Strict"))
+			.andExpect(cookie().path("refresh_token", "/api/auth"));
+	}
+
+	@Test
+	void refreshReturnsNewAccessToken() throws Exception {
+		Cookie refreshCookie = loginForRefreshCookie("admin@fitness.local", "Admin123!");
+
+		mockMvc.perform(post("/api/auth/refresh").cookie(refreshCookie))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.token").isNotEmpty())
+			.andExpect(jsonPath("$.user.email").value("admin@fitness.local"));
+	}
+
+	@Test
+	void refreshWithoutCookieIsRejected() throws Exception {
+		mockMvc.perform(post("/api/auth/refresh"))
+			.andExpect(status().isUnauthorized())
+			.andExpect(jsonPath("$.message").value("Session expired"));
+	}
+
+	@Test
+	void logoutRevokesRefreshToken() throws Exception {
+		Cookie refreshCookie = loginForRefreshCookie("trainer@fitness.local", "Admin123!");
+
+		mockMvc.perform(post("/api/auth/logout").cookie(refreshCookie))
+			.andExpect(status().isNoContent())
+			.andExpect(cookie().maxAge("refresh_token", 0));
+
+		mockMvc.perform(post("/api/auth/refresh").cookie(refreshCookie))
+			.andExpect(status().isUnauthorized());
+	}
+
+	@Test
 	void meRequiresAuthentication() throws Exception {
 		mockMvc.perform(get("/api/auth/me"))
 			.andExpect(status().isUnauthorized())
@@ -148,6 +193,12 @@ class AuthControllerTests {
 		String body = login(email, password).andReturn().getResponse().getContentAsString();
 
 		return JsonPath.read(body, "$.token");
+	}
+
+	private Cookie loginForRefreshCookie(String email, String password) throws Exception {
+		MockHttpServletResponse response = login(email, password).andReturn().getResponse();
+
+		return response.getCookie("refresh_token");
 	}
 
 	private static String bearer(String token) {

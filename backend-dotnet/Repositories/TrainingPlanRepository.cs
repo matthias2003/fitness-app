@@ -31,4 +31,19 @@ public class TrainingPlanRepository(TrainingDbContext db)
             .ThenInclude(planExercise => planExercise.Exercise)
             .FirstOrDefaultAsync(plan => plan.Id == id);
     }
+
+    public Task<List<PlanExercise>> FindDayExercises(Guid planId, int dayNo)
+    {
+        return db.PlanExercises
+            .Include(planExercise => planExercise.Exercise)
+            .Where(planExercise => planExercise.PlanId == planId && planExercise.DayNo == dayNo)
+            .ToListAsync();
+    }
+
+    public Task<List<PlanExercise>> FindExercisesOfPlans(List<Guid> planIds)
+    {
+        return db.PlanExercises
+            .Where(planExercise => planIds.Contains(planExercise.PlanId))
+            .ToListAsync();
+    }
 }

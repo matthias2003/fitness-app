@@ -1,6 +1,7 @@
 package com.fitness.api.model;
 
 import java.time.Instant;
+import java.util.UUID;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -27,6 +28,8 @@ public class CheckIn {
 	@Column(nullable = false)
 	private Instant checkedInAt;
 
+	private UUID trainingSessionId;
+
 	protected CheckIn() {
 	}
 
@@ -45,6 +48,14 @@ public class CheckIn {
 
 	public Instant getCheckedInAt() {
 		return checkedInAt;
+	}
+
+	public UUID getTrainingSessionId() {
+		return trainingSessionId;
+	}
+
+	public void setTrainingSessionId(UUID trainingSessionId) {
+		this.trainingSessionId = trainingSessionId;
 	}
 
 }

@@ -11,16 +11,20 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.fitness.api.client.TrainingApiClient;
 import com.fitness.api.dto.CheckInRequest;
 import com.fitness.api.dto.CheckInResponse;
 import com.fitness.api.dto.CheckInResultResponse;
 import com.fitness.api.dto.PageResponse;
+import com.fitness.api.dto.WorkoutSessionResponse;
 import com.fitness.api.model.CheckIn;
 import com.fitness.api.model.Membership;
+import com.fitness.api.model.PlanAssignment;
 import com.fitness.api.model.Role;
 import com.fitness.api.model.User;
 import com.fitness.api.repository.CheckInRepository;
 import com.fitness.api.repository.MembershipRepository;
+import com.fitness.api.repository.PlanAssignmentRepository;
 import com.fitness.api.repository.UserRepository;
 
 @Service
@@ -32,11 +36,18 @@ public class CheckInService {
 
 	private final CheckInRepository checkInRepository;
 
+	private final PlanAssignmentRepository planAssignmentRepository;
+
+	private final TrainingApiClient trainingApiClient;
+
 	public CheckInService(UserRepository userRepository, MembershipRepository membershipRepository,
-			CheckInRepository checkInRepository) {
+			CheckInRepository checkInRepository, PlanAssignmentRepository planAssignmentRepository,
+			TrainingApiClient trainingApiClient) {
 		this.userRepository = userRepository;
 		this.membershipRepository = membershipRepository;
 		this.checkInRepository = checkInRepository;
+		this.planAssignmentRepository = planAssignmentRepository;
+		this.trainingApiClient = trainingApiClient;
 	}
 
 	@Transactional
@@ -59,6 +70,9 @@ public class CheckInService {
 		CheckIn checkIn = new CheckIn(member);
 		CheckIn savedCheckIn = checkInRepository.save(checkIn);
 
+		UUID trainingSessionId = startTrainingSession(member.getId());
+		savedCheckIn.setTrainingSessionId(trainingSessionId);
+
 		return CheckInResultResponse.from(savedCheckIn, membership);
 	}
 
@@ -70,6 +84,21 @@ public class CheckInService {
 		Page<CheckIn> checkIns = checkInRepository.findByMemberId(memberId, pageRequest);
 
 		return PageResponse.from(checkIns, CheckInResponse::from);
+	}
+
+	private UUID startTrainingSession(UUID memberId) {
+		UUID planId = planAssignmentRepository.findFirstByMemberIdOrderByAssignedAtDesc(memberId)
+			.map(PlanAssignment::getTrainingPlanId)
+			.orElse(null);
+
+		try {
+			WorkoutSessionResponse session = trainingApiClient.startSession(memberId, planId);
+
+			return session.id();
+		}
+		catch (ResponseStatusException ex) {
+			return null;
+		}
 	}
 
 }

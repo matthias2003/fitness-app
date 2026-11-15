@@ -34,6 +34,7 @@ export type CheckInResult = {
   membershipType: string
   membershipEndDate: string
   checkedInAt: string
+  trainingSessionId: string | null
 }
 
 export type Member = {
@@ -90,4 +91,55 @@ export type Client = {
   email: string
   firstName: string
   lastName: string
+}
+
+export type WorkoutSet = {
+  id: number
+  exerciseId: number
+  exerciseName: string
+  reps: number
+  weight: number
+  createdAt: string
+}
+
+export type WorkoutSession = {
+  id: string
+  memberId: string
+  startedAt: string
+  completedAt: string | null
+  plannedDay: PlanDay | null
+  sets: WorkoutSet[]
+}
+
+export type SessionSummary = {
+  id: string
+  startedAt: string
+  completedAt: string
+  dayName: string | null
+  setsCount: number
+  totalVolume: number
+}
+
+export type NewRecord = {
+  exerciseId: number
+  exerciseName: string
+  maxWeight: number
+  previousMaxWeight: number | null
+}
+
+export type CompleteSummary = {
+  sessionId: string
+  completedAt: string
+  setsCount: number
+  totalVolume: number
+  previousVolume: number | null
+  newRecords: NewRecord[]
+}
+
+export type PersonalRecord = {
+  exerciseId: number
+  exerciseName: string
+  muscleGroup: string
+  maxWeight: number
+  achievedAt: string
 }

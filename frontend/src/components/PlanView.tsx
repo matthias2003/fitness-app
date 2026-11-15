@@ -20,7 +20,7 @@ export function PlanView({ plan }: { plan: TrainingPlan }) {
   )
 }
 
-function DayCard({ day }: { day: PlanDay }) {
+export function DayCard({ day }: { day: PlanDay }) {
   return (
     <article className={`${card} flex flex-col gap-3`}>
       <div className="flex items-center justify-between gap-2">

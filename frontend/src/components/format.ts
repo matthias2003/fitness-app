@@ -32,3 +32,13 @@ export const levelLabels: Record<Level, string> = {
   INTERMEDIATE: 'Intermediate',
   ADVANCED: 'Advanced',
 }
+
+export function formatWeight(kilograms: number): string {
+  const rounded = Math.round(kilograms * 100) / 100
+
+  return `${rounded.toLocaleString('en-GB')} kg`
+}
+
+export function formatSets(count: number): string {
+  return count === 1 ? '1 set' : `${count} sets`
+}

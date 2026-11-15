@@ -13,6 +13,9 @@ import { CheckInsPage } from './pages/member/CheckInsPage'
 import { MembershipPage } from './pages/member/MembershipPage'
 import { MyQrPage } from './pages/member/MyQrPage'
 import { PlanPage } from './pages/member/PlanPage'
+import { RecordsPage } from './pages/member/RecordsPage'
+import { WorkoutHistoryPage } from './pages/member/WorkoutHistoryPage'
+import { WorkoutPage } from './pages/member/WorkoutPage'
 import { ClientsPage } from './pages/trainer/ClientsPage'
 import { PlanBuilderPage } from './pages/trainer/PlanBuilderPage'
 
@@ -33,6 +36,9 @@ function App() {
               <Route path="/qr" element={<MyQrPage />} />
               <Route path="/check-ins" element={<CheckInsPage />} />
               <Route path="/plan" element={<PlanPage />} />
+              <Route path="/workout" element={<WorkoutPage />} />
+              <Route path="/workouts" element={<WorkoutHistoryPage />} />
+              <Route path="/records" element={<RecordsPage />} />
             </Route>
             <Route element={<ProtectedRoute roles={['ADMIN']} />}>
               <Route path="/status" element={<StatusPage />} />

@@ -9,12 +9,14 @@ type NavItem = {
 
 const roleLinks: Record<Role, NavItem[]> = {
   MEMBER: [
-    { label: 'My membership', to: '/membership' },
+    { label: 'Membership', to: '/membership' },
     { label: 'My QR', to: '/qr' },
     { label: 'Check-ins', to: '/check-ins' },
     { label: 'My plan', to: '/plan' },
+    { label: 'Workout', to: '/workout' },
+    { label: 'History', to: '/workouts' },
+    { label: 'Records', to: '/records' },
     { label: 'Exercises', to: '/exercises' },
-    { label: 'Class schedule' },
   ],
   TRAINER: [
     { label: 'Scanner', to: '/scanner' },

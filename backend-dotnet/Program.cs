@@ -31,8 +31,11 @@ builder.Services.AddDbContext<TrainingDbContext>(options =>
 builder.Services.AddScoped<StatusService>();
 builder.Services.AddScoped<ExerciseRepository>();
 builder.Services.AddScoped<TrainingPlanRepository>();
+builder.Services.AddScoped<WorkoutSessionRepository>();
+builder.Services.AddScoped<PersonalRecordRepository>();
 builder.Services.AddScoped<ExerciseService>();
 builder.Services.AddScoped<PlanService>();
+builder.Services.AddScoped<SessionService>();
 
 var app = builder.Build();
 
@@ -55,6 +58,19 @@ app.Use(async (context, next) =>
     }
 
     await next(context);
+});
+
+app.Use(async (context, next) =>
+{
+    try
+    {
+        await next(context);
+    }
+    catch (ApiException exception)
+    {
+        context.Response.StatusCode = exception.StatusCode;
+        await context.Response.WriteAsJsonAsync(new ErrorResponse(exception.Message));
+    }
 });
 
 app.MapControllers();

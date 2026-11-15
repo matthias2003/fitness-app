@@ -1,21 +1,32 @@
 package com.fitness.api.controller;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willReturn;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.web.server.ResponseStatusException;
 
+import com.fitness.api.client.TrainingApiClient;
+import com.fitness.api.dto.WorkoutSessionResponse;
 import com.fitness.api.model.Membership;
 import com.fitness.api.model.MembershipType;
 import com.fitness.api.model.User;
@@ -36,12 +47,37 @@ class CheckInControllerTests {
 
 	private final MembershipRepository membershipRepository;
 
+	@MockitoBean
+	private TrainingApiClient trainingApiClient;
+
 	CheckInControllerTests(MockMvc mockMvc, UserRepository userRepository,
 			MembershipTypeRepository membershipTypeRepository, MembershipRepository membershipRepository) {
 		this.mockMvc = mockMvc;
 		this.userRepository = userRepository;
 		this.membershipTypeRepository = membershipTypeRepository;
 		this.membershipRepository = membershipRepository;
+	}
+
+	@BeforeEach
+	void trainingServiceIsDown() {
+		ResponseStatusException unavailable = new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+				"Training service is unavailable");
+		given(trainingApiClient.startSession(any(), any())).willThrow(unavailable);
+	}
+
+	@Test
+	void returnsStartedTrainingSessionId() throws Exception {
+		UUID sessionId = UUID.randomUUID();
+		WorkoutSessionResponse session = new WorkoutSessionResponse(sessionId, UUID.randomUUID(), Instant.now(), null,
+				null, List.of());
+		willReturn(session).given(trainingApiClient).startSession(any(), any());
+		String memberToken = registerAndLogin("checkin-session@example.com");
+		buyFirstType(memberToken);
+		String qrToken = qrToken(memberToken);
+
+		checkIn(qrToken)
+			.andExpect(status().isCreated())
+			.andExpect(jsonPath("$.trainingSessionId").value(sessionId.toString()));
 	}
 
 	@Test

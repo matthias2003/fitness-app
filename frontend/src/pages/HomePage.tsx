@@ -15,9 +15,11 @@ const roleTiles: Record<Role, Tile[]> = {
     { title: 'My QR code', description: 'Show it at the front desk', to: '/qr' },
     { title: 'Check-in history', description: 'Your gym visits', to: '/check-ins' },
     { title: 'My training plan', description: 'Your days, sets and reps', to: '/plan' },
+    { title: 'Workout', description: 'Log sets and see progress', to: '/workout' },
+    { title: 'Workout history', description: 'Your finished workouts', to: '/workouts' },
+    { title: 'Personal records', description: 'Your best lifts', to: '/records' },
     { title: 'Exercises', description: 'Browse the exercise library', to: '/exercises' },
     { title: 'Class schedule', description: 'Book group classes' },
-    { title: 'Workout log', description: 'Log sets and see progress' },
   ],
   TRAINER: [
     { title: 'Check-in scanner', description: 'Scan member QR codes', to: '/scanner' },

@@ -13,4 +13,9 @@ public class ExerciseRepository(TrainingDbContext db)
             .ThenBy(exercise => exercise.Name)
             .ToListAsync();
     }
+
+    public Task<bool> Exists(int id)
+    {
+        return db.Exercises.AnyAsync(exercise => exercise.Id == id);
+    }
 }
